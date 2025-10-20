@@ -15,4 +15,9 @@ class Article extends Model
             'content',
             'author',
         ];
+
+    public function likes()
+    {
+        return $this->belongsToMany(User::class, 'articles_likes');
+    }
 }

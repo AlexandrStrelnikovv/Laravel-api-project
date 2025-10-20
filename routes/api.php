@@ -8,4 +8,6 @@ Route::prefix('articles')->group(function () {
     Route::get('/{id}', [ArticleController::class, 'show']);
     Route::post('/', [ArticleController::class, 'store']);
     Route::put('/{id}', [ArticleController::class, 'update']);
+    Route::post('{article}/like', [ArticleController::class, 'like']);
+    Route::post('{article}/unlike', [ArticleController::class, 'unlike']);
 });
