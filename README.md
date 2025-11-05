@@ -33,58 +33,178 @@ Laravel Framework
 Laravel Sanctum (для аутентификации API)
 
 •
-MySQL/PostgreSQL (или любая другая поддерживаемая БД)
+Docker и Laravel Sail (для локальной разработки)
 
-Установка и Запуск
+•
+PostgreSQL (конфигурация по умолчанию для Sail)
 
-Для запуска проекта локально выполните следующие шаги:
+Установка и Запуск с использованием Laravel Sail
+
+Для запуска проекта локально с использованием Docker и Laravel Sail выполните следующие шаги:
 
 1. Клонирование репозитория
 
-
+Bash
 
 
 git clone https://github.com/AlexandrStrelnikovv/Laravel-api-project.git
-
+cd Laravel-api-project
 
 
 2. Настройка окружения
 
-Создайте файл .env 
+Создайте файл .env на основе примера:
+
+Bash
 
 
-DB_CONNECTION=pgsql  
-DB_HOST=pgsql  
-DB_PORT=5432  
-DB_DATABASE=apiproject  
-DB_USERNAME=sail  
-DB_PASSWORD=password   
+cp .env.example .env
 
 
-3. Установка зависимостей
+Отредактируйте файл .env, указав данные для подключения к базе данных, как это принято в окружении Sail (PostgreSQL):
 
-Установите все необходимые PHP-зависимости с помощью Composer:
+Plain Text
 
 
+DB_CONNECTION=pgsql
+DB_HOST=pgsql
+DB_PORT=5432
+DB_DATABASE=apiproject
+DB_USERNAME=sail
+DB_PASSWORD=password
 
-- composer install
 
-4. Запустите Docker контейнер 
-- ./vendor/bin/sail up
+3. Запуск Docker контейнеров
+
+Запустите контейнеры с помощью Sail. Это также установит необходимые зависимости, если они еще не установлены.
+
+Bash
+
+
+./vendor/bin/sail up -d
+
+
+Используйте -d для запуска в фоновом режиме.
+
+4. Установка зависимостей
+
+Установите все необходимые PHP-зависимости с помощью Composer внутри контейнера:
+
+Bash
+
+
+./vendor/bin/sail composer install
+
 
 5. Генерация ключа приложения
 
+Сгенерируйте ключ приложения:
+
+Bash
 
 
-
-- /vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan key:generate
 
 
 6. Миграции базы данных
 
 Выполните миграции для создания необходимых таблиц (пользователи, статьи, лайки):
 
+Bash
 
 
-- /vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan migrate
+
+
+Проект будет доступен по адресу http://localhost (или по адресу, указанному в вашем .env файле).
+
+API Эндпоинты
+
+Ниже приведены основные маршруты API. Все маршруты API имеют префикс /api.
+
+Категория
+Метод
+Маршрут
+Описание
+Требуется Аутентификация
+Аутентификация
+POST
+/api/register
+Регистрация нового пользователя.
+Нет
+
+
+POST
+/api/login
+Вход пользователя и получение токена Sanctum.
+Нет
+
+
+POST
+/api/logout
+Выход пользователя (отзыв токена).
+Да
+Статьи
+GET
+/api/articles
+Получить список всех статей.
+Нет
+
+
+POST
+/api/articles
+Создать новую статью.
+Да
+
+
+GET
+/api/articles/{id}
+Получить статью по ID.
+Нет
+
+
+PUT/PATCH
+/api/articles/{id}
+Обновить статью по ID.
+Да (только автор)
+
+
+DELETE
+/api/articles/{id}
+Удалить статью по ID.
+Да (только автор)
+Лайки
+POST
+/api/articles/{id}/like
+Поставить лайк статье.
+Да
+
+
+DELETE
+/api/articles/{id}/like
+Убрать лайк со статьи.
+Да
+
+
+Структура Проекта
+
+Проект использует следующие архитектурные решения:
+
+•
+app/Http/Controllers: Содержит контроллеры (ArticleController, AuthController), которые делегируют бизнес-логику сервисам.
+
+•
+app/Services: Содержит ArticleService, где инкапсулирована вся бизнес-логика, связанная со статьями (CRUD, лайки).
+
+•
+app/Http/Requests: Содержит Form Requests для валидации входящих данных.
+
+•
+app/Http/Resources: Содержит API Resources для форматирования ответов.
+
+•
+app/Models: Содержит модели Eloquent (User, Article, ArticleLikes).
+
+•
+routes/api.php: Определяет все маршруты API.
 
