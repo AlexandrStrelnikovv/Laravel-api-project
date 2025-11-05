@@ -8,6 +8,7 @@ use App\Http\Resources\ArticleCollection;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use App\Services\ArticleService;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class ArticleController extends Controller
@@ -30,25 +31,37 @@ class ArticleController extends Controller
 
     public function store(StoreRequest $request) : ArticleResource
     {
-        $article = $this->articleService->create($request->validated());
+        $user = $request->user();
+        $data = $request->validated();
+        $data['author'] = $user->id;
+        $article = $this->articleService->create($data);
         return  new ArticleResource($article);
     }
 
     public function update(UpdateRequest $request, int $id) : ArticleResource
     {
-        $article = $this->articleService->update($request->validated(), $id);
+        $user = $request->user();
+        $data = $request->validated();
+        $data['author'] = $user->id;
+        $article = $this->articleService->update($data, $id);
         return new ArticleResource($article);
     }
 
-    public function like(Article $article) : JsonResponse
+    public function delete(int $id)
     {
-        $this->articleService->like($article);
+        $this->articleService->deleteArticle($id);
+        return response()->json([], 204);
+    }
+
+    public function like(Article $article, Request $request) : JsonResponse
+    {
+        $this->articleService->like($article, $request);
         return response()->json(['response' => 'success']);
     }
 
-    public function unlike(Article $article) : JsonResponse
+    public function unlike(Article $article, Request $request) : JsonResponse
     {
-        $this->articleService->unlike($article);
+        $this->articleService->unlike($article, $request);
         return response()->json(['response' => 'success']);
     }
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Article;
 use Illuminate\Database\Eloquent\Collection;
+use App\Models\User;
 
 class ArticleService
 {
@@ -35,20 +36,25 @@ class ArticleService
         return $article;
     }
 
-    public function like($articleId)
+    public function deleteArticle(int $id) : bool
     {
-        if(!$articleId->likes()->where('user_id', 1)->where('article_id', $articleId->id)->exists())
+        $this->article->delete($id);
+        return true;
+    }
+    public function like($articleId, User $user)
+    {
+        if(!$articleId->likes()->where('user_id', $user->id)->where('article_id', $articleId->id)->exists())
         {
-            $articleId->likes()->attach(1);
+            $articleId->likes()->attach($user->id);
         }
         return true;
     }
 
-    public function unlike($articleId)
+    public function unlike($articleId,  User $user)
     {
-        if($articleId->likes()->where('user_id', 1)->where('article_id', $articleId->id)->exists())
+        if($articleId->likes()->where('user_id', $user->id)->where('article_id', $articleId->id)->exists())
         {
-            $articleId->likes()->detach(1);
+            $articleId->likes()->detach($user->id);
         }
         return true;
     }
